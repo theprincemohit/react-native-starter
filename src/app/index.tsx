@@ -1,61 +1,43 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
+import { AppDrawer } from '@/components/navigation/app-drawer';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+import { darkPalette, lightPalette } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function HomeScreen() {
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const colorScheme = useColorScheme();
+  const palette = colorScheme === 'dark' ? darkPalette : lightPalette;
+
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
+        {/* Top Header with Drawer Hamburger Button */}
+        <View style={styles.topBar}>
+          <TouchableOpacity
+            style={[styles.menuButton, { backgroundColor: palette.background.surface, borderColor: palette.border.default }]}
+            activeOpacity={0.7}
+            onPress={() => setIsDrawerOpen(true)}>
+            <Text style={[styles.menuIcon, { color: palette.text.primary }]}>☰</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Center Welcome */}
+        <View style={styles.centerContent}>
           <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
+            Welcome User
           </ThemedText>
-        </ThemedView>
+        </View>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
+        {/* Component Drawer */}
+        <AppDrawer
+          isOpen={isDrawerOpen}
+          onClose={() => setIsDrawerOpen(false)}
+        />
       </SafeAreaView>
     </ThemedView>
   );
@@ -64,35 +46,36 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
   },
   safeArea: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
+    paddingHorizontal: 20,
+    paddingTop: 10,
   },
-  heroSection: {
+  topBar: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    width: '100%',
+  },
+  menuButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  menuIcon: {
+    fontSize: 22,
+    fontWeight: '700',
+  },
+  centerContent: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   title: {
     textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
   },
 });
